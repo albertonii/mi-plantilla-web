@@ -1,0 +1,167 @@
+---
+export interface Props {
+  id?: string;
+  type?: 'success' | 'error' | 'warning' | 'info';
+  title: string;
+  message: string;
+  duration?: number;
+}
+
+const { id = 'notification', type = 'info', title, message, duration = 5000 } = Astro.props;
+---
+
+<div
+  id={id}
+  class={`fixed top-4 right-4 z-50 max-w-sm w-full bg-dark-800 border-l-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full ${
+    type === 'success' ? 'border-green-500' :
+    type === 'error' ? 'border-red-500' :
+    type === 'warning' ? 'border-yellow-500' :
+    'border-blue-500'
+  }`}
+>
+  <div class="p-4">
+    <div class="flex items-start">
+      <div class="flex-shrink-0">
+        {type === 'success' && (
+          <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        )}
+        {type === 'error' && (
+          <svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        )}
+        {type === 'warning' && (
+          <svg class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        )}
+        {type === 'info' && (
+          <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        )}
+      </div>
+      <div class="ml-3 flex-1">
+        <h3 class="text-sm font-medium text-gray-100">{title}</h3>
+        <p class="mt-1 text-sm text-gray-400">{message}</p>
+      </div>
+      <div class="ml-4 flex-shrink-0 flex">
+        <button
+          class="close-notification bg-dark-800 rounded-md inline-flex text-gray-400 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          <span class="sr-only">Cerrar</span>
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  class NotificationManager {
+    private notifications: Map<string, HTMLElement> = new Map();
+    private counter = 0;
+
+    show(type: 'success' | 'error' | 'warning' | 'info', title: string, message: string, duration = 5000) {
+      const id = `notification-${++this.counter}`;
+      const notification = this.createNotification(id, type, title, message);
+      
+      document.body.appendChild(notification);
+      this.notifications.set(id, notification);
+      
+      // Animar entrada
+      setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+      }, 100);
+      
+      // Auto-remover después del tiempo especificado
+      if (duration > 0) {
+        setTimeout(() => {
+          this.hide(id);
+        }, duration);
+      }
+      
+      return id;
+    }
+
+    hide(id: string) {
+      const notification = this.notifications.get(id);
+      if (notification) {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+          this.notifications.delete(id);
+        }, 300);
+      }
+    }
+
+    private createNotification(id: string, type: 'success' | 'error' | 'warning' | 'info', title: string, message: string): HTMLElement {
+      const notification = document.createElement('div');
+      notification.id = id;
+      notification.className = `fixed top-4 right-4 z-50 max-w-sm w-full bg-dark-800 border-l-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full ${
+        type === 'success' ? 'border-green-500' :
+        type === 'error' ? 'border-red-500' :
+        type === 'warning' ? 'border-yellow-500' :
+        'border-blue-500'
+      }`;
+
+      const icon = this.getIcon(type);
+      
+      notification.innerHTML = `
+        <div class="p-4">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              ${icon}
+            </div>
+            <div class="ml-3 flex-1">
+              <h3 class="text-sm font-medium text-gray-100">${title}</h3>
+              <p class="mt-1 text-sm text-gray-400">${message}</p>
+            </div>
+            <div class="ml-4 flex-shrink-0 flex">
+              <button class="close-notification bg-dark-800 rounded-md inline-flex text-gray-400 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <span class="sr-only">Cerrar</span>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Event listener para cerrar
+      const closeBtn = notification.querySelector('.close-notification');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          this.hide(id);
+        });
+      }
+
+      return notification;
+    }
+
+    private getIcon(type: 'success' | 'error' | 'warning' | 'info'): string {
+      switch (type) {
+        case 'success':
+          return '<svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+        case 'error':
+          return '<svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+        case 'warning':
+          return '<svg class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>';
+        case 'info':
+          return '<svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+        default:
+          return '';
+      }
+    }
+  }
+
+  // Hacer disponible globalmente
+  window.notificationManager = new NotificationManager();
+</script>

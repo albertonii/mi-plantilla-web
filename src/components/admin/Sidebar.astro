@@ -1,0 +1,74 @@
+---
+const navItems = [
+  { href: '/admin', label: 'Dashboard', icon: '📊' },
+  { href: '/admin/fotografia', label: 'Fotografía', icon: '📷' },
+  { href: '/admin/proyectos', label: 'Proyectos', icon: '💻' },
+  { href: '/admin/perfil', label: 'Perfil', icon: '👤' },
+  { href: '/admin/configuracion', label: 'Configuración', icon: '⚙️' },
+];
+---
+
+<aside class="fixed inset-y-0 left-0 z-50 w-64 bg-dark-900 border-r border-dark-700 transform transition-transform duration-300 ease-in-out" id="sidebar">
+  <div class="flex items-center justify-between h-16 px-6 border-b border-dark-700">
+    <h1 class="text-xl font-space-grotesk font-semibold text-primary-400">
+      Admin Panel
+    </h1>
+    <button
+      id="sidebar-close"
+      class="lg:hidden p-2 rounded-md text-gray-400 hover:text-white hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+      aria-label="Cerrar menú"
+    >
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+  
+  <nav class="mt-6 px-3">
+    <div class="space-y-1">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:text-white hover:bg-dark-700 transition-colors"
+        >
+          <span class="mr-3 text-lg">{item.icon}</span>
+          {item.label}
+        </a>
+      ))}
+    </div>
+  </nav>
+  
+  <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-dark-700">
+    <button
+      id="logout-btn"
+      class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors"
+    >
+      <span class="mr-3">🚪</span>
+      Cerrar Sesión
+    </button>
+  </div>
+</aside>
+
+<script>
+  // Toggle sidebar en móvil
+  const sidebar = document.getElementById('sidebar');
+  const sidebarClose = document.getElementById('sidebar-close');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  if (sidebarClose) {
+    sidebarClose.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      // Aquí se implementaría la lógica de logout
+      if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+        // Limpiar localStorage y redirigir
+        localStorage.removeItem('admin-token');
+        window.location.href = '/admin/login';
+      }
+    });
+  }
+</script>

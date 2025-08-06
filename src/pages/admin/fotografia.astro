@@ -1,0 +1,364 @@
+---
+import AdminLayout from '../../layouts/admin/AdminLayout.astro';
+import Sidebar from '../../components/admin/Sidebar.astro';
+import Header from '../../components/admin/Header.astro';
+
+// Datos de ejemplo
+const photographyData = [
+  {
+    id: '1',
+    title: 'Amanecer en la Montaña',
+    description: 'Captura del primer rayo de sol sobre las cumbres nevadas',
+    image_url: '/images/photo1.jpg',
+    price: 150,
+    location: 'Alpes Suizos',
+    date: '2024-01-15',
+    tags: ['naturaleza', 'paisaje', 'amanecer'],
+    status: 'available'
+  },
+  {
+    id: '2',
+    title: 'Retrato Urbano',
+    description: 'Momentos cotidianos en la ciudad',
+    image_url: '/images/photo2.jpg',
+    price: 100,
+    location: 'Barcelona',
+    date: '2024-02-20',
+    tags: ['urbano', 'retrato', 'street'],
+    status: 'available'
+  },
+  {
+    id: '3',
+    title: 'Arquitectura Moderna',
+    description: 'Líneas geométricas y formas abstractas',
+    image_url: '/images/photo3.jpg',
+    price: 200,
+    location: 'Nueva York',
+    date: '2024-03-10',
+    tags: ['arquitectura', 'moderno', 'geometría'],
+    status: 'sold'
+  }
+];
+---
+
+<AdminLayout title="Gestión de Fotografía">
+  <div class="flex h-screen bg-dark-950">
+    <Sidebar />
+    
+    <div class="flex-1 flex flex-col lg:ml-64">
+      <Header title="Fotografía" subtitle="Gestiona tu galería de fotografías" />
+      
+      <main class="flex-1 overflow-y-auto p-6">
+        <!-- Actions Bar -->
+        <div class="flex justify-between items-center mb-6">
+          <div class="flex space-x-4">
+            <button
+              id="add-photo-btn"
+              class="btn-primary"
+            >
+              <span class="mr-2">📷</span>
+              Añadir Fotografía
+            </button>
+            <button
+              class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              <span class="mr-2">📊</span>
+              Exportar
+            </button>
+          </div>
+          
+          <div class="flex space-x-2">
+            <select class="px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <option value="">Todos los estados</option>
+              <option value="available">Disponible</option>
+              <option value="sold">Vendida</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Buscar fotografías..."
+              class="px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+        </div>
+
+        <!-- Photos Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {photographyData.map((photo) => (
+            <div class="bg-dark-800 rounded-lg overflow-hidden hover:bg-dark-700 transition-colors">
+              <div class="aspect-square bg-gradient-to-br from-primary-600 to-primary-800 relative">
+                <div class="w-full h-full bg-dark-700 flex items-center justify-center">
+                  <span class="text-4xl">📷</span>
+                </div>
+                <div class="absolute top-4 right-4 flex space-x-2">
+                  <button
+                    class="edit-photo-btn p-2 bg-dark-800 rounded-lg text-gray-300 hover:text-white hover:bg-dark-700 transition-colors"
+                    data-id={photo.id}
+                    aria-label="Editar"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button
+                    class="delete-photo-btn p-2 bg-red-600 rounded-lg text-white hover:bg-red-700 transition-colors"
+                    data-id={photo.id}
+                    aria-label="Eliminar"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+                {photo.status === 'sold' && (
+                  <div class="absolute top-4 left-4 bg-red-600 text-white px-2 py-1 rounded text-xs font-medium">
+                    Vendida
+                  </div>
+                )}
+              </div>
+              <div class="p-4">
+                <h3 class="text-lg font-semibold text-gray-100 mb-2">{photo.title}</h3>
+                <p class="text-gray-400 text-sm mb-3">{photo.description}</p>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-primary-400 font-medium">${photo.price}</span>
+                  <span class="text-gray-500 text-sm">{photo.location}</span>
+                </div>
+                <div class="flex flex-wrap gap-1 mb-3">
+                  {photo.tags.map((tag) => (
+                    <span class="px-2 py-1 bg-dark-700 text-gray-300 text-xs rounded">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div class="flex space-x-2">
+                  <button
+                    class="flex-1 px-3 py-2 bg-primary-600 text-white text-sm rounded hover:bg-primary-700 transition-colors"
+                  >
+                    Ver Detalles
+                  </button>
+                  <button
+                    class="px-3 py-2 bg-dark-700 text-gray-300 text-sm rounded hover:bg-dark-600 transition-colors"
+                  >
+                    Duplicar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal para añadir/editar fotografía -->
+  <div id="photo-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-dark-800 rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-semibold text-gray-100" id="modal-title">
+              Añadir Fotografía
+            </h3>
+            <button
+              id="close-modal"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <form id="photo-form" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  Título
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  Precio
+                </label>
+                <input
+                  type="number"
+                  name="price"
+                  class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                Descripción
+              </label>
+              <textarea
+                name="description"
+                rows="3"
+                class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              ></textarea>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  Ubicación
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  Fecha
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                Etiquetas (separadas por comas)
+              </label>
+              <input
+                type="text"
+                name="tags"
+                class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="naturaleza, paisaje, amanecer"
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                Estado
+              </label>
+              <select
+                name="status"
+                class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="available">Disponible</option>
+                <option value="sold">Vendida</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                Imagen
+              </label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            
+            <div class="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                id="cancel-btn"
+                class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                Guardar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Verificar autenticación
+    const token = localStorage.getItem('admin-token');
+    if (!token) {
+      window.location.href = '/admin/login';
+    }
+
+    // Modal functionality
+    const modal = document.getElementById('photo-modal');
+    const addBtn = document.getElementById('add-photo-btn');
+    const closeBtn = document.getElementById('close-modal');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const form = document.getElementById('photo-form');
+
+    function openModal() {
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      form.reset();
+    }
+
+    if (addBtn) addBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    // Form submission
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        
+        submitBtn.textContent = 'Guardando...';
+        submitBtn.disabled = true;
+        
+        try {
+          // Aquí se integraría con Supabase
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          alert('Fotografía guardada exitosamente');
+          closeModal();
+          
+        } catch (error) {
+          alert('Error al guardar: ' + error.message);
+        } finally {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        }
+      });
+    }
+
+    // Edit and delete buttons
+    document.querySelectorAll('.edit-photo-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const photoId = btn.getAttribute('data-id');
+        // Aquí se cargarían los datos de la foto
+        document.getElementById('modal-title').textContent = 'Editar Fotografía';
+        openModal();
+      });
+    });
+
+    document.querySelectorAll('.delete-photo-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const photoId = btn.getAttribute('data-id');
+        if (confirm('¿Estás seguro de que quieres eliminar esta fotografía?')) {
+          // Aquí se eliminaría la foto
+          alert('Fotografía eliminada');
+        }
+      });
+    });
+  </script>
+</AdminLayout>

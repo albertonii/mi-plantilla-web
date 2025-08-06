@@ -1,0 +1,179 @@
+---
+import AdminLayout from '../../layouts/admin/AdminLayout.astro';
+import Sidebar from '../../components/admin/Sidebar.astro';
+import Header from '../../components/admin/Header.astro';
+
+// Datos de ejemplo para el dashboard
+const stats = [
+  { name: 'Fotografías', value: '24', change: '+12%', changeType: 'positive' },
+  { name: 'Proyectos', value: '8', change: '+3%', changeType: 'positive' },
+  { name: 'Ventas', value: '$1,240', change: '+8%', changeType: 'positive' },
+  { name: 'Visitas', value: '1,234', change: '-2%', changeType: 'negative' },
+];
+
+const recentActivity = [
+  { type: 'fotografia', action: 'Nueva fotografía añadida', time: 'Hace 2 horas', title: 'Amanecer en la Montaña' },
+  { type: 'proyecto', action: 'Proyecto actualizado', time: 'Hace 4 horas', title: 'E-commerce Platform' },
+  { type: 'venta', action: 'Fotografía vendida', time: 'Hace 6 horas', title: 'Retrato Urbano' },
+  { type: 'contacto', action: 'Nuevo mensaje de contacto', time: 'Hace 1 día', title: 'Consulta sobre proyecto' },
+];
+---
+
+<AdminLayout title="Dashboard">
+  <div class="flex h-screen bg-dark-950">
+    <Sidebar />
+    
+    <div class="flex-1 flex flex-col lg:ml-64">
+      <Header title="Dashboard" subtitle="Resumen general de tu portfolio" />
+      
+      <main class="flex-1 overflow-y-auto p-6">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat) => (
+            <div class="bg-dark-800 rounded-lg p-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-400">{stat.name}</p>
+                  <p class="text-2xl font-bold text-gray-100">{stat.value}</p>
+                </div>
+                <div class={`flex items-center text-sm ${
+                  stat.changeType === 'positive' ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  <span>{stat.change}</span>
+                  <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L12 10.586 17.586 5H13z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div class="bg-dark-800 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-100 mb-4">Acciones Rápidas</h3>
+            <div class="space-y-3">
+              <a
+                href="/admin/fotografia/nueva"
+                class="flex items-center p-3 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors"
+              >
+                <span class="text-2xl mr-3">📷</span>
+                <div>
+                  <p class="font-medium text-gray-100">Añadir Fotografía</p>
+                  <p class="text-sm text-gray-400">Subir nueva imagen a la galería</p>
+                </div>
+              </a>
+              
+              <a
+                href="/admin/proyectos/nuevo"
+                class="flex items-center p-3 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors"
+              >
+                <span class="text-2xl mr-3">💻</span>
+                <div>
+                  <p class="font-medium text-gray-100">Crear Proyecto</p>
+                  <p class="text-sm text-gray-400">Añadir nuevo proyecto al portfolio</p>
+                </div>
+              </a>
+              
+              <a
+                href="/admin/perfil"
+                class="flex items-center p-3 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors"
+              >
+                <span class="text-2xl mr-3">👤</span>
+                <div>
+                  <p class="font-medium text-gray-100">Editar Perfil</p>
+                  <p class="text-sm text-gray-400">Actualizar información personal</p>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div class="bg-dark-800 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-100 mb-4">Actividad Reciente</h3>
+            <div class="space-y-4">
+              {recentActivity.map((activity) => (
+                <div class="flex items-start space-x-3">
+                  <div class={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                    activity.type === 'fotografia' ? 'bg-blue-600' :
+                    activity.type === 'proyecto' ? 'bg-green-600' :
+                    activity.type === 'venta' ? 'bg-yellow-600' :
+                    'bg-purple-600'
+                  }`}>
+                    {activity.type === 'fotografia' ? '📷' :
+                     activity.type === 'proyecto' ? '💻' :
+                     activity.type === 'venta' ? '💰' : '📧'}
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-100">{activity.action}</p>
+                    <p class="text-sm text-gray-400">{activity.title}</p>
+                    <p class="text-xs text-gray-500">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Items -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-dark-800 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-100 mb-4">Últimas Fotografías</h3>
+            <div class="space-y-3">
+              {[
+                { title: 'Amanecer en la Montaña', status: 'Disponible', price: '$150' },
+                { title: 'Retrato Urbano', status: 'Vendida', price: '$100' },
+                { title: 'Arquitectura Moderna', status: 'Disponible', price: '$200' },
+              ].map((photo) => (
+                <div class="flex items-center justify-between p-3 bg-dark-700 rounded-lg">
+                  <div>
+                    <p class="font-medium text-gray-100">{photo.title}</p>
+                    <p class="text-sm text-gray-400">{photo.price}</p>
+                  </div>
+                  <span class={`px-2 py-1 text-xs rounded-full ${
+                    photo.status === 'Disponible' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                  }`}>
+                    {photo.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div class="bg-dark-800 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-100 mb-4">Proyectos Recientes</h3>
+            <div class="space-y-3">
+              {[
+                { title: 'E-commerce Platform', status: 'Completado', tech: 'React, Node.js' },
+                { title: 'Portfolio Website', status: 'En Progreso', tech: 'Astro, Tailwind' },
+                { title: 'Task Management App', status: 'Planificado', tech: 'Vue.js, Firebase' },
+              ].map((project) => (
+                <div class="flex items-center justify-between p-3 bg-dark-700 rounded-lg">
+                  <div>
+                    <p class="font-medium text-gray-100">{project.title}</p>
+                    <p class="text-sm text-gray-400">{project.tech}</p>
+                  </div>
+                  <span class={`px-2 py-1 text-xs rounded-full ${
+                    project.status === 'Completado' ? 'bg-green-600 text-white' :
+                    project.status === 'En Progreso' ? 'bg-yellow-600 text-white' :
+                    'bg-blue-600 text-white'
+                  }`}>
+                    {project.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Verificar autenticación
+    const token = localStorage.getItem('admin-token');
+    if (!token) {
+      window.location.href = '/admin/login';
+    }
+  </script>
+</AdminLayout>

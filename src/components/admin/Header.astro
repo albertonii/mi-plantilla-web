@@ -1,0 +1,66 @@
+---
+export interface Props {
+  title: string;
+  subtitle?: string;
+}
+
+const { title, subtitle } = Astro.props;
+---
+
+<header class="bg-dark-900 border-b border-dark-700 px-6 py-4">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center">
+      <button
+        id="sidebar-toggle"
+        class="lg:hidden p-2 rounded-md text-gray-400 hover:text-white hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 mr-4"
+        aria-label="Abrir menú"
+      >
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div>
+        <h1 class="text-2xl font-space-grotesk font-bold text-gray-100">{title}</h1>
+        {subtitle && <p class="text-gray-400 text-sm">{subtitle}</p>}
+      </div>
+    </div>
+    
+    <div class="flex items-center space-x-4">
+      <button
+        class="p-2 rounded-md text-gray-400 hover:text-white hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+        aria-label="Notificaciones"
+      >
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+      </button>
+      
+      <div class="relative">
+        <button
+          class="flex items-center space-x-2 p-2 rounded-md text-gray-400 hover:text-white hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+          aria-label="Menú de usuario"
+        >
+          <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+            <span class="text-sm font-medium text-white">A</span>
+          </div>
+          <span class="hidden md:block text-sm font-medium">Admin</span>
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Toggle sidebar
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebar = document.getElementById('sidebar');
+
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.remove('-translate-x-full');
+    });
+  }
+</script>
