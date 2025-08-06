@@ -1,0 +1,167 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+
+// Datos de ejemplo - en producción vendrían de Supabase
+const photographyData = [
+  {
+    id: '1',
+    title: 'Amanecer en la Montaña',
+    description: 'Captura del primer rayo de sol sobre las cumbres nevadas',
+    image_url: '/images/photo1.jpg',
+    price: 150,
+    location: 'Alpes Suizos',
+    date: '2024-01-15',
+    tags: ['naturaleza', 'paisaje', 'amanecer'],
+    status: 'available'
+  },
+  {
+    id: '2',
+    title: 'Retrato Urbano',
+    description: 'Momentos cotidianos en la ciudad',
+    image_url: '/images/photo2.jpg',
+    price: 100,
+    location: 'Barcelona',
+    date: '2024-02-20',
+    tags: ['urbano', 'retrato', 'street'],
+    status: 'available'
+  },
+  {
+    id: '3',
+    title: 'Arquitectura Moderna',
+    description: 'Líneas geométricas y formas abstractas',
+    image_url: '/images/photo3.jpg',
+    price: 200,
+    location: 'Nueva York',
+    date: '2024-03-10',
+    tags: ['arquitectura', 'moderno', 'geometría'],
+    status: 'sold'
+  }
+];
+
+const allTags = [...new Set(photographyData.flatMap(photo => photo.tags))];
+---
+
+<BaseLayout title="Fotografía - Portfolio Personal">
+  <Navigation />
+  
+  <!-- Hero Section -->
+  <section class="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center">
+        <h1 class="text-4xl sm:text-5xl font-space-grotesk font-bold text-gray-100 mb-6">
+          Galería de <span class="text-primary-400">Fotografía</span>
+        </h1>
+        <p class="text-xl text-gray-400 max-w-3xl mx-auto mb-8">
+          Capturando momentos únicos y creando arte visual a través del lente. 
+          Cada imagen cuenta una historia diferente.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters Section -->
+  <section class="pb-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-wrap gap-4 justify-center">
+        <button
+          class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          data-filter="all"
+        >
+          Todas
+        </button>
+        {allTags.map((tag) => (
+          <button
+            class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            data-filter={tag}
+          >
+            {tag}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section class="pb-16 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="gallery">
+        {photographyData.map((photo) => (
+          <div 
+            class="photo-card bg-dark-800 rounded-lg overflow-hidden hover:bg-dark-700 transition-all duration-300 hover:scale-105"
+            data-tags={photo.tags.join(' ')}
+          >
+            <div class="aspect-square bg-gradient-to-br from-primary-600 to-primary-800 relative">
+              <div class="w-full h-full bg-dark-700 flex items-center justify-center">
+                <span class="text-4xl">📷</span>
+              </div>
+              {photo.status === 'sold' && (
+                <div class="absolute top-4 right-4 bg-red-600 text-white px-2 py-1 rounded text-xs font-medium">
+                  Vendida
+                </div>
+              )}
+            </div>
+            <div class="p-6">
+              <h3 class="text-lg font-semibold text-gray-100 mb-2">{photo.title}</h3>
+              <p class="text-gray-400 text-sm mb-4">{photo.description}</p>
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-primary-400 font-medium">${photo.price}</span>
+                <span class="text-gray-500 text-sm">{photo.location}</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                {photo.tags.map((tag) => (
+                  <span class="px-2 py-1 bg-dark-700 text-gray-300 text-xs rounded">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              {photo.status === 'available' && (
+                <button class="w-full mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                  Interesado en Comprar
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+
+  <style>
+    .filter-btn {
+      @apply bg-dark-800 text-gray-300 hover:bg-dark-700;
+    }
+    .filter-btn.active {
+      @apply bg-primary-600 text-white;
+    }
+  </style>
+
+  <script>
+    // Filtros de galería
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const photoCards = document.querySelectorAll('.photo-card');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const filter = button.getAttribute('data-filter');
+        
+        // Actualizar botones activos
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Filtrar fotos
+        photoCards.forEach(card => {
+          const tags = card.getAttribute('data-tags');
+          if (filter === 'all' || tags.includes(filter)) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+</BaseLayout>
