@@ -345,11 +345,14 @@ const projectsData = [
   </div>
 
   <script>
-    // Verificar autenticación
-    const token = localStorage.getItem('admin-token');
-    if (!token) {
-      window.location.href = '/admin/login';
-    }
+    import { requireAuth } from '../../services/auth.js';
+
+    // Verificar autenticación al cargar la página
+    requireAuth().then(user => {
+      if (user) {
+        console.log('✅ Acceso autorizado a gestión de proyectos');
+      }
+    });
 
     // Modal functionality
     const modal = document.getElementById('project-modal');

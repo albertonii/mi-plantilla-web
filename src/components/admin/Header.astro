@@ -35,25 +35,50 @@ const { title, subtitle } = Astro.props;
         </svg>
       </button>
       
-      <div class="relative">
+      <div class="relative" id="user-menu">
         <button
+          id="user-menu-button"
           class="flex items-center space-x-2 p-2 rounded-md text-gray-400 hover:text-white hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
           aria-label="Menú de usuario"
         >
           <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-            <span class="text-sm font-medium text-white">A</span>
+            <span class="text-sm font-medium text-white" id="user-initial">A</span>
           </div>
-          <span class="hidden md:block text-sm font-medium">Admin</span>
+          <span class="hidden md:block text-sm font-medium" id="user-name">Admin</span>
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
+        
+        <!-- Dropdown menu -->
+        <div
+          id="user-dropdown"
+          class="hidden absolute right-0 mt-2 w-48 bg-dark-800 rounded-md shadow-lg py-1 z-50"
+        >
+          <div class="px-4 py-2 border-b border-dark-700">
+            <p class="text-sm text-gray-300" id="dropdown-user-name">Administrador</p>
+            <p class="text-xs text-gray-500" id="dropdown-user-email">admin@cms.com</p>
+          </div>
+          <button
+            id="logout-button"
+            class="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-dark-700 hover:text-white transition-colors"
+          >
+            <div class="flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Cerrar Sesión
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </header>
 
 <script>
+  import { getCurrentUser, signOut } from '../../services/auth.js';
+
   // Toggle sidebar
   const sidebarToggle = document.getElementById('sidebar-toggle');
   const sidebar = document.getElementById('sidebar');
@@ -61,6 +86,62 @@ const { title, subtitle } = Astro.props;
   if (sidebarToggle && sidebar) {
     sidebarToggle.addEventListener('click', () => {
       sidebar.classList.remove('-translate-x-full');
+    });
+  }
+
+  // User menu functionality
+  const userMenuButton = document.getElementById('user-menu-button');
+  const userDropdown = document.getElementById('user-dropdown');
+  const userInitial = document.getElementById('user-initial');
+  const userName = document.getElementById('user-name');
+  const dropdownUserName = document.getElementById('dropdown-user-name');
+  const dropdownUserEmail = document.getElementById('dropdown-user-email');
+  const logoutButton = document.getElementById('logout-button');
+
+  // Load user data
+  const currentUser = getCurrentUser();
+  if (currentUser) {
+    const initial = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'A';
+    const displayName = currentUser.name || 'Administrador';
+    const email = currentUser.email || 'admin@cms.com';
+
+    if (userInitial) userInitial.textContent = initial;
+    if (userName) userName.textContent = displayName;
+    if (dropdownUserName) dropdownUserName.textContent = displayName;
+    if (dropdownUserEmail) dropdownUserEmail.textContent = email;
+  }
+
+  // Toggle dropdown
+  if (userMenuButton && userDropdown) {
+    userMenuButton.addEventListener('click', () => {
+      userDropdown.classList.toggle('hidden');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+      if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+        userDropdown.classList.add('hidden');
+      }
+    });
+  }
+
+  // Logout functionality
+  if (logoutButton) {
+    logoutButton.addEventListener('click', async () => {
+      try {
+        const { success, error } = await signOut();
+        
+        if (success) {
+          console.log('✅ Sesión cerrada exitosamente');
+          window.location.href = '/admin/login';
+        } else {
+          console.error('❌ Error al cerrar sesión:', error);
+          alert('Error al cerrar sesión: ' + error.message);
+        }
+      } catch (error) {
+        console.error('❌ Error inesperado:', error);
+        alert('Error inesperado al cerrar sesión');
+      }
     });
   }
 </script>
