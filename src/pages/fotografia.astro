@@ -9,6 +9,12 @@ let photographyData = [];
 let allTags = [];
 
 try {
+  // Obtener todas las fotos sin filtro primero
+  const { data: allData, error: allError } = await supabase
+    .from('photography')
+    .select('*');
+    
+  // Hacer la consulta con filtro
   const { data, error } = await supabase
     .from('photography')
     .select('*')
@@ -19,6 +25,12 @@ try {
     console.error('Error al cargar fotografías:', error);
   } else {
     photographyData = data || [];
+    
+    // Si no hay fotos con status 'available', usar todas las fotos
+    if (photographyData.length === 0 && allData && allData.length > 0) {
+      photographyData = allData;
+    }
+    
     // Obtener todas las etiquetas únicas
     allTags = [...new Set(photographyData.flatMap(photo => photo.tags || []))];
   }
@@ -41,6 +53,9 @@ try {
           Capturando momentos únicos y creando arte visual a través del lente. 
           Cada imagen cuenta una historia diferente.
         </p>
+        <button id="test-modal" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+          Test Modal
+        </button>
       </div>
     </div>
   </section>
@@ -178,27 +193,25 @@ try {
   </div>
 
   <!-- Modal para vista grande de imagen -->
-  <div id="large-image-modal" class="fixed inset-0 bg-black/95 z-50 hidden">
-    <div class="flex items-center justify-center min-h-screen p-4">
-      <div class="relative max-w-7xl w-full">
-        <!-- Botón de cerrar -->
-        <button id="close-large-modal" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10 bg-black/50 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm">
-          ×
-        </button>
-        
-        <!-- Información de la imagen -->
-        <div id="large-image-info" class="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg p-4 text-white hidden">
-          <h3 id="large-image-title" class="text-lg font-semibold mb-2"></h3>
-          <p id="large-image-description" class="text-sm text-gray-300 mb-2"></p>
-          <div class="flex items-center justify-between text-xs text-gray-400">
-            <span id="large-image-price"></span>
-            <span id="large-image-location"></span>
-          </div>
+  <div id="large-image-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center">
+    <div class="relative max-w-7xl w-full h-full flex items-center justify-center p-4">
+      <!-- Botón de cerrar -->
+      <button id="close-large-modal" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10 bg-black/50 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm transition-all duration-200">
+        ×
+      </button>
+      
+      <!-- Información de la imagen -->
+      <div id="large-image-info" class="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg p-4 text-white hidden">
+        <h3 id="large-image-title" class="text-lg font-semibold mb-2"></h3>
+        <p id="large-image-description" class="text-sm text-gray-300 mb-2"></p>
+        <div class="flex items-center justify-between text-xs text-gray-400">
+          <span id="large-image-price"></span>
+          <span id="large-image-location"></span>
         </div>
-        
-        <!-- Imagen principal -->
-        <img id="large-image" class="w-full h-auto max-h-[90vh] object-contain rounded-lg" />
       </div>
+      
+      <!-- Imagen principal -->
+      <img id="large-image" class="w-full h-auto max-h-[90vh] object-contain rounded-lg shadow-2xl" />
     </div>
   </div>
 
@@ -231,6 +244,7 @@ try {
     /* Estilos para el modal de pantalla completa */
     #large-image-modal {
       backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
     
     #large-image-info {
@@ -243,12 +257,50 @@ try {
     
     #close-large-modal:hover {
       transform: scale(1.1);
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    /* Mejoras para la imagen en pantalla completa */
+    #large-image {
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    #large-image:hover {
+      transform: scale(1.02);
+    }
+    
+    /* Asegurar que el modal ocupe toda la pantalla */
+    #large-image-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9999;
     }
   </style>
 
   <script src="/js/photography-gallery.js" is:inline></script>
-  <script>
+  <script define:vars={{ photographyData }}>
+    // Definir los datos de fotografía como variable global
+    window.photographyData = {photographyData};
+    
+    // Crear una versión limpia de los datos para el JavaScript
+    const cleanPhotographyData = photographyData.map(photo => ({
+      id: photo.id,
+      title: photo.title,
+      description: photo.description,
+      image_url: photo.image_url,
+      price: photo.price,
+      location: photo.location,
+      date: photo.date,
+      tags: photo.tags,
+      status: photo.status
+    }));
+    
     // Inicializar la galería con los datos del servidor
-    initPhotographyGallery(JSON.stringify(photographyData));
+    if (cleanPhotographyData && cleanPhotographyData.length > 0) {
+      initPhotographyGallery(JSON.stringify(cleanPhotographyData));
+    }
   </script>
 </BaseLayout>
