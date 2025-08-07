@@ -532,16 +532,32 @@ export class PhotographyUI {
 
   // Editar fotografía
   async editPhotography(photoId) {
-    const photo = this.currentPhotography.find((p) => p.id === photoId);
-    if (!photo) {
-      this.showError("Fotografía no encontrada");
-      return;
-    }
+    try {
+      const photo = this.currentPhotography.find((p) => p.id === photoId);
+      if (!photo) {
+        this.showError("Fotografía no encontrada");
+        return;
+      }
 
-    this.editingPhotoId = photoId;
-    document.getElementById("modal-title").textContent = "Editar Fotografía";
-    this.fillForm(photo);
-    this.openModal();
+      this.editingPhotoId = photoId;
+
+      // Actualizar título del modal
+      const modalTitle = document.getElementById("modal-title");
+      if (modalTitle) {
+        modalTitle.textContent = "Editar Fotografía";
+      }
+
+      // Llenar formulario con datos de la fotografía
+      this.fillForm(photo);
+
+      // Abrir modal
+      this.openModal();
+
+      console.log("✅ Modal de edición abierto para:", photo.title);
+    } catch (error) {
+      console.error("❌ Error al editar fotografía:", error);
+      this.showError("Error al cargar datos de la fotografía");
+    }
   }
 
   // Duplicar fotografía
@@ -607,16 +623,26 @@ export class PhotographyUI {
 
   // Llenar formulario
   fillForm(photo) {
-    document.getElementById("photo-id").value = photo.id;
-    document.getElementById("photo-title").value = photo.title;
-    document.getElementById("photo-description").value =
-      photo.description || "";
-    document.getElementById("photo-price").value = photo.price || "";
-    document.getElementById("photo-location").value = photo.location || "";
-    document.getElementById("photo-date").value = photo.date || "";
-    document.getElementById("photo-tags").value = (photo.tags || []).join(", ");
-    document.getElementById("photo-status").value = photo.status;
-    document.getElementById("photo-image-url").value = photo.image_url || "";
+    // Llenar campos del formulario de manera segura
+    const elements = {
+      "photo-id": photo.id || "",
+      "photo-title": photo.title || "",
+      "photo-description": photo.description || "",
+      "photo-price": photo.price || "",
+      "photo-location": photo.location || "",
+      "photo-date": photo.date || "",
+      "photo-tags": (photo.tags || []).join(", "),
+      "photo-status": photo.status || "available",
+      "photo-image-url": photo.image_url || "",
+    };
+
+    // Llenar cada campo si existe el elemento
+    Object.entries(elements).forEach(([id, value]) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.value = value;
+      }
+    });
 
     // Configurar el toggle de fuente de imagen
     const uploadRadio = document.querySelector(
@@ -630,14 +656,33 @@ export class PhotographyUI {
 
     if (photo.image_url) {
       // Si hay URL, seleccionar opción de URL
-      if (urlRadio) urlRadio.checked = true;
-      if (uploadSection) uploadSection.classList.add("hidden");
-      if (urlSection) urlSection.classList.remove("hidden");
+      if (urlRadio) {
+        urlRadio.checked = true;
+        if (uploadSection) uploadSection.classList.add("hidden");
+        if (urlSection) urlSection.classList.remove("hidden");
+      }
     } else {
       // Si no hay URL, seleccionar opción de subida
-      if (uploadRadio) uploadRadio.checked = true;
-      if (uploadSection) uploadSection.classList.remove("hidden");
-      if (urlSection) urlSection.classList.add("hidden");
+      if (uploadRadio) {
+        uploadRadio.checked = true;
+        if (uploadSection) uploadSection.classList.remove("hidden");
+        if (urlSection) urlSection.classList.add("hidden");
+      }
+    }
+
+    // Mostrar preview de imagen si existe
+    if (photo.image_url) {
+      const previewImage = document.getElementById("preview-image");
+      const fileName = document.getElementById("file-name");
+      const fileSize = document.getElementById("file-size");
+      const filePreview = document.getElementById("file-preview");
+
+      if (previewImage && fileName && fileSize && filePreview) {
+        previewImage.src = photo.image_url;
+        fileName.textContent = "Imagen actual";
+        fileSize.textContent = "URL externa";
+        filePreview.classList.remove("hidden");
+      }
     }
   }
 
@@ -683,20 +728,84 @@ export class PhotographyUI {
 
   // Funciones de modal
   openModal() {
-    document.getElementById("photo-modal").classList.remove("hidden");
-    this.resetForm();
+    const modal = document.getElementById("photo-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+
+      // Solo resetear si no estamos editando
+      if (!this.editingPhotoId) {
+        this.resetForm();
+      }
+    }
   }
 
   closeModal() {
-    document.getElementById("photo-modal").classList.add("hidden");
+    const modal = document.getElementById("photo-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+    }
+
+    // Siempre resetear al cerrar
     this.resetForm();
   }
 
   resetForm() {
-    document.getElementById("photo-form").reset();
+    // Resetear formulario de manera segura
+    const form = document.getElementById("photo-form");
+    if (form) {
+      form.reset();
+    }
+
+    // Limpiar campos específicos
+    const elements = [
+      "photo-id",
+      "photo-title",
+      "photo-description",
+      "photo-price",
+      "photo-location",
+      "photo-date",
+      "photo-tags",
+      "photo-status",
+      "photo-image-url",
+    ];
+
+    elements.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.value = "";
+      }
+    });
+
+    // Resetear estado de edición
     this.editingPhotoId = null;
-    document.getElementById("modal-title").textContent = "Añadir Fotografía";
-    document.getElementById("photo-id").value = "";
+
+    // Actualizar título del modal
+    const modalTitle = document.getElementById("modal-title");
+    if (modalTitle) {
+      modalTitle.textContent = "Añadir Fotografía";
+    }
+
+    // Limpiar preview de archivo
+    const filePreview = document.getElementById("file-preview");
+    if (filePreview) {
+      filePreview.classList.add("hidden");
+    }
+
+    // Resetear toggle de fuente de imagen
+    const uploadRadio = document.querySelector(
+      'input[name="image_source"][value="upload"]'
+    );
+    const urlRadio = document.querySelector(
+      'input[name="image_source"][value="url"]'
+    );
+    const uploadSection = document.getElementById("upload-section");
+    const urlSection = document.getElementById("url-section");
+
+    if (uploadRadio && urlRadio) {
+      uploadRadio.checked = true;
+      if (uploadSection) uploadSection.classList.remove("hidden");
+      if (urlSection) urlSection.classList.add("hidden");
+    }
   }
 
   // Funciones de exportación

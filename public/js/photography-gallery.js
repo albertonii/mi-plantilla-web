@@ -7,6 +7,7 @@ let photographyData = [];
 // Inicializar la galería
 function initPhotographyGallery(data) {
   photographyData = data;
+  console.log("🎨 Inicializando galería de fotografía con", data.length, "imágenes");
 
   // Filtros de galería
   const filterButtons = document.querySelectorAll(".filter-btn");
@@ -40,51 +41,49 @@ function initPhotographyGallery(data) {
   const viewLargeBtn = document.getElementById("view-large");
 
   // Abrir modal de vista detallada
-  photoCards.forEach((card) => {
+  console.log("📸 Configurando event listeners para", photoCards.length, "tarjetas de foto");
+  photoCards.forEach((card, index) => {
     card.addEventListener("click", () => {
+      console.log("🖱️ Clic en tarjeta", index + 1);
       const photoId = card.getAttribute("data-photo-id");
       const photo = photographyData.find((p) => p.id === photoId);
 
       if (photo) {
-        // Llenar modal con datos de la foto
-        document.getElementById("modal-title").textContent = photo.title;
-        document.getElementById("modal-image").src = photo.image_url;
-        document.getElementById("modal-description").textContent =
-          photo.description || "Sin descripción";
-        document.getElementById("modal-price").textContent = photo.price
-          ? `$${photo.price}`
-          : "No especificado";
-        document.getElementById("modal-location").textContent =
-          photo.location || "Sin ubicación";
-        document.getElementById("modal-date").textContent =
-          photo.date || "Sin fecha";
-        document.getElementById("modal-status").textContent =
-          photo.status === "available" ? "Disponible" : "Vendida";
+        console.log("🖼️ Abriendo imagen en pantalla completa:", photo.title);
+        
+        // Mostrar imagen directamente en pantalla completa
+        const largeImage = document.getElementById("large-image");
+        const largeImageInfo = document.getElementById("large-image-info");
+        const largeImageTitle = document.getElementById("large-image-title");
+        const largeImageDescription = document.getElementById("large-image-description");
+        const largeImagePrice = document.getElementById("large-image-price");
+        const largeImageLocation = document.getElementById("large-image-location");
 
-        // Llenar etiquetas
-        const tagsContainer = document.getElementById("modal-tags");
-        tagsContainer.innerHTML = "";
-        if (photo.tags && photo.tags.length > 0) {
-          photo.tags.forEach((tag) => {
-            const tagSpan = document.createElement("span");
-            tagSpan.className =
-              "px-2 py-1 bg-dark-700 text-gray-300 text-xs rounded";
-            tagSpan.textContent = tag;
-            tagsContainer.appendChild(tagSpan);
-          });
+        // Verificar que los elementos existen
+        if (!largeImage) {
+          console.error("❌ Elemento large-image no encontrado");
+          return;
         }
 
-        // Mostrar/ocultar botón de compra según el estado
-        const buyButton = document.getElementById("modal-buy-button");
-        if (photo.status === "available") {
-          buyButton.classList.remove("hidden");
-        } else {
-          buyButton.classList.add("hidden");
-        }
+        largeImage.src = photo.image_url;
+        largeImage.alt = photo.title;
 
-        // Mostrar modal
-        photoModal.classList.remove("hidden");
+        // Llenar información de la imagen
+        if (largeImageTitle) largeImageTitle.textContent = photo.title;
+        if (largeImageDescription) largeImageDescription.textContent = photo.description || "Sin descripción";
+        if (largeImagePrice) largeImagePrice.textContent = photo.price ? `$${photo.price}` : "Precio no especificado";
+        if (largeImageLocation) largeImageLocation.textContent = photo.location || "Sin ubicación";
+
+        // Mostrar modal de pantalla completa
+        console.log("🖼️ Mostrando modal de pantalla completa");
+        largeImageModal.classList.remove("hidden");
         document.body.style.overflow = "hidden";
+        console.log("✅ Modal mostrado, overflow bloqueado");
+
+        // Mostrar información después de un breve delay
+        setTimeout(() => {
+          if (largeImageInfo) largeImageInfo.classList.remove("hidden");
+        }, 500);
       }
     });
   });
@@ -115,15 +114,19 @@ function initPhotographyGallery(data) {
 
   // Cerrar modal de vista grande
   closeLargeModal.addEventListener("click", () => {
+    const largeImageInfo = document.getElementById("large-image-info");
+    if (largeImageInfo) largeImageInfo.classList.add("hidden");
     largeImageModal.classList.add("hidden");
-    photoModal.classList.remove("hidden");
+    document.body.style.overflow = "auto";
   });
 
   // Cerrar modal grande al hacer clic fuera
   largeImageModal.addEventListener("click", (e) => {
     if (e.target === largeImageModal) {
+      const largeImageInfo = document.getElementById("large-image-info");
+      if (largeImageInfo) largeImageInfo.classList.add("hidden");
       largeImageModal.classList.add("hidden");
-      photoModal.classList.remove("hidden");
+      document.body.style.overflow = "auto";
     }
   });
 
@@ -131,8 +134,10 @@ function initPhotographyGallery(data) {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       if (!largeImageModal.classList.contains("hidden")) {
+        const largeImageInfo = document.getElementById("large-image-info");
+        if (largeImageInfo) largeImageInfo.classList.add("hidden");
         largeImageModal.classList.add("hidden");
-        photoModal.classList.remove("hidden");
+        document.body.style.overflow = "auto";
       } else if (!photoModal.classList.contains("hidden")) {
         photoModal.classList.add("hidden");
         document.body.style.overflow = "auto";
