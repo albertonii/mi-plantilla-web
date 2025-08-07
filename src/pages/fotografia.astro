@@ -2,45 +2,29 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import { supabase } from '../../supabase/config';
 
-// Datos de ejemplo - en producción vendrían de Supabase
-const photographyData = [
-  {
-    id: '1',
-    title: 'Amanecer en la Montaña',
-    description: 'Captura del primer rayo de sol sobre las cumbres nevadas',
-    image_url: '/images/photo1.jpg',
-    price: 150,
-    location: 'Alpes Suizos',
-    date: '2024-01-15',
-    tags: ['naturaleza', 'paisaje', 'amanecer'],
-    status: 'available'
-  },
-  {
-    id: '2',
-    title: 'Retrato Urbano',
-    description: 'Momentos cotidianos en la ciudad',
-    image_url: '/images/photo2.jpg',
-    price: 100,
-    location: 'Barcelona',
-    date: '2024-02-20',
-    tags: ['urbano', 'retrato', 'street'],
-    status: 'available'
-  },
-  {
-    id: '3',
-    title: 'Arquitectura Moderna',
-    description: 'Líneas geométricas y formas abstractas',
-    image_url: '/images/photo3.jpg',
-    price: 200,
-    location: 'Nueva York',
-    date: '2024-03-10',
-    tags: ['arquitectura', 'moderno', 'geometría'],
-    status: 'sold'
+// Cargar datos reales de Supabase
+let photographyData = [];
+let allTags = [];
+
+try {
+  const { data, error } = await supabase
+    .from('photography')
+    .select('*')
+    .eq('status', 'available')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error al cargar fotografías:', error);
+  } else {
+    photographyData = data || [];
+    // Obtener todas las etiquetas únicas
+    allTags = [...new Set(photographyData.flatMap(photo => photo.tags || []))];
   }
-];
-
-const allTags = [...new Set(photographyData.flatMap(photo => photo.tags))];
+} catch (error) {
+  console.error('Error inesperado:', error);
+}
 ---
 
 <BaseLayout title="Fotografía - Portfolio Personal">
@@ -71,7 +55,7 @@ const allTags = [...new Set(photographyData.flatMap(photo => photo.tags))];
         >
           Todas
         </button>
-        {allTags.map((tag) => (
+        {allTags.length > 0 && allTags.map((tag) => (
           <button
             class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             data-filter={tag}
@@ -86,47 +70,124 @@ const allTags = [...new Set(photographyData.flatMap(photo => photo.tags))];
   <!-- Gallery Section -->
   <section class="pb-16 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="gallery">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" id="gallery">
         {photographyData.map((photo) => (
           <div 
-            class="photo-card bg-dark-800 rounded-lg overflow-hidden hover:bg-dark-700 transition-all duration-300 hover:scale-105"
-            data-tags={photo.tags.join(' ')}
+            class="photo-card group cursor-pointer"
+            data-tags={(photo.tags || []).join(' ')}
+            data-photo-id={photo.id}
           >
-            <div class="aspect-square bg-gradient-to-br from-primary-600 to-primary-800 relative">
-              <div class="w-full h-full bg-dark-700 flex items-center justify-center">
+            <div class="aspect-square relative overflow-hidden rounded-lg max-w-xs">
+              {photo.image_url ? (
+                <img 
+                  src={photo.image_url} 
+                  alt={photo.title}
+                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                />
+              ) : null}
+              <div class="w-full h-full bg-dark-700 flex items-center justify-center" style={photo.image_url ? 'display: none;' : ''}>
                 <span class="text-4xl">📷</span>
               </div>
-              {photo.status === 'sold' && (
-                <div class="absolute top-4 right-4 bg-red-600 text-white px-2 py-1 rounded text-xs font-medium">
-                  Vendida
+              
+              {/* Precio sutil en esquina derecha */}
+              {photo.status === 'available' && photo.price && (
+                <div class="absolute top-2 right-2 bg-black/50 backdrop-blur-sm text-white px-1 py-0.5 rounded text-xs font-medium">
+                  ${photo.price}
                 </div>
               )}
-            </div>
-            <div class="p-6">
-              <h3 class="text-lg font-semibold text-gray-100 mb-2">{photo.title}</h3>
-              <p class="text-gray-400 text-sm mb-4">{photo.description}</p>
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-primary-400 font-medium">${photo.price}</span>
-                <span class="text-gray-500 text-sm">{photo.location}</span>
+              
+              {/* Overlay con título en hover */}
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <h3 class="text-white text-sm font-semibold text-center px-2">
+                  {photo.title}
+                </h3>
               </div>
-              <div class="flex flex-wrap gap-2">
-                {photo.tags.map((tag) => (
-                  <span class="px-2 py-1 bg-dark-700 text-gray-300 text-xs rounded">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              {photo.status === 'available' && (
-                <button class="w-full mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                  Interesado en Comprar
-                </button>
-              )}
             </div>
           </div>
         ))}
       </div>
     </div>
   </section>
+
+  <!-- Modal para vista detallada -->
+  <div id="photo-modal" class="fixed inset-0 bg-black/80 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-dark-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-6">
+            <h2 id="modal-title" class="text-2xl font-bold text-gray-100"></h2>
+            <button id="close-modal" class="text-gray-400 hover:text-white text-2xl">
+              ×
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-4">
+              <div class="aspect-square relative overflow-hidden rounded-lg">
+                <img id="modal-image" class="w-full h-full object-cover" />
+              </div>
+              <div class="flex justify-center">
+                <button id="view-large" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                  Ver en Grande
+                </button>
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-100 mb-2">Descripción</h3>
+                <p id="modal-description" class="text-gray-400"></p>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-300 mb-1">Precio</h4>
+                  <p id="modal-price" class="text-primary-400 font-semibold"></p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-300 mb-1">Ubicación</h4>
+                  <p id="modal-location" class="text-gray-400"></p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-300 mb-1">Fecha</h4>
+                  <p id="modal-date" class="text-gray-400"></p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-300 mb-1">Estado</h4>
+                  <p id="modal-status" class="text-gray-400"></p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-medium text-gray-300 mb-2">Etiquetas</h4>
+                <div id="modal-tags" class="flex flex-wrap gap-2"></div>
+              </div>
+              
+              <div id="modal-buy-button" class="hidden">
+                <button class="w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                  Interesado en Comprar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para vista grande de imagen -->
+  <div id="large-image-modal" class="fixed inset-0 bg-black/90 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="relative max-w-7xl w-full">
+        <button id="close-large-modal" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10">
+          ×
+        </button>
+        <img id="large-image" class="w-full h-auto max-h-[90vh] object-contain" />
+      </div>
+    </div>
+  </div>
 
   <Footer />
 
@@ -137,31 +198,27 @@ const allTags = [...new Set(photographyData.flatMap(photo => photo.tags))];
     .filter-btn.active {
       @apply bg-primary-600 text-white;
     }
+    
+    /* Estilos para imágenes más pequeñas */
+    .photo-card {
+      @apply max-w-full;
+    }
+    
+    .photo-card img {
+      @apply object-cover;
+    }
+    
+    /* Responsive para pantallas muy pequeñas */
+    @media (max-width: 640px) {
+      #gallery {
+        @apply grid-cols-2 gap-3;
+      }
+    }
   </style>
 
+  <script src="/js/photography-gallery.js" is:inline></script>
   <script>
-    // Filtros de galería
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const photoCards = document.querySelectorAll('.photo-card');
-
-    filterButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const filter = button.getAttribute('data-filter');
-        
-        // Actualizar botones activos
-        filterButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        
-        // Filtrar fotos
-        photoCards.forEach(card => {
-          const tags = card.getAttribute('data-tags');
-          if (filter === 'all' || tags.includes(filter)) {
-            card.style.display = 'block';
-          } else {
-            card.style.display = 'none';
-          }
-        });
-      });
-    });
+    // Inicializar la galería con los datos del servidor
+    initPhotographyGallery(JSON.stringify(photographyData));
   </script>
 </BaseLayout>
