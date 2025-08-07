@@ -1,0 +1,50 @@
+# Exclude documentation files that contain secrets
+.env.example
+README.md
+*.md
+scripts/*.md
+supabase/*.md
+
+# Exclude development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Exclude IDE files
+.vscode/
+.idea/
+
+# Exclude OS files
+.DS_Store
+Thumbs.db
+
+# Exclude logs
+*.log
+logs/
+
+# Exclude temporary files
+*.tmp
+*.temp
+
+# Exclude test files
+test/
+tests/
+__tests__/
+
+# Exclude documentation
+docs/
+documentation/
+
+# Exclude scripts that contain secrets
+scripts/test-*.js
+scripts/setup-*.sh
+scripts/create-*.js
+scripts/verify-*.sql
+scripts/apply-*.sh
+scripts/apply-*.js
+scripts/push-*.sh
+scripts/setup-*.sh
+scripts/check-*.sh
+scripts/test-*.js 

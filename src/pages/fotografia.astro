@@ -37,6 +37,13 @@ try {
 } catch (error) {
   console.error('Error inesperado:', error);
 }
+
+// Función para truncar texto
+function truncateText(text, maxLength = 100) {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + '...';
+}
 ---
 
 <BaseLayout title="Fotografía - Portfolio Personal">
@@ -110,11 +117,16 @@ try {
                 </div>
               )}
               
-              {/* Overlay con título en hover */}
-              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <h3 class="text-white text-sm font-semibold text-center px-2">
+              {/* Overlay con título y descripción en hover */}
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4">
+                <h3 class="text-white text-sm font-semibold text-center mb-2">
                   {photo.title}
                 </h3>
+                {photo.description && (
+                  <p class="text-white text-xs text-center leading-relaxed">
+                    {truncateText(photo.description, 80)}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -361,6 +373,17 @@ try {
     
     #close-info:hover {
       transform: scale(1.1);
+    }
+    
+    /* Estilos para el overlay de las tarjetas de fotos */
+    .photo-card .absolute {
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    
+    /* Mejorar legibilidad del texto en overlay */
+    .photo-card .text-white {
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     }
   </style>
 
