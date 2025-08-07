@@ -53,9 +53,6 @@ try {
           Capturando momentos únicos y creando arte visual a través del lente. 
           Cada imagen cuenta una historia diferente.
         </p>
-        <button id="test-modal" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-          Test Modal
-        </button>
       </div>
     </div>
   </section>
@@ -200,18 +197,42 @@ try {
         ×
       </button>
       
-      <!-- Información de la imagen -->
-      <div id="large-image-info" class="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg p-4 text-white hidden">
-        <h3 id="large-image-title" class="text-lg font-semibold mb-2"></h3>
-        <p id="large-image-description" class="text-sm text-gray-300 mb-2"></p>
-        <div class="flex items-center justify-between text-xs text-gray-400">
-          <span id="large-image-price"></span>
-          <span id="large-image-location"></span>
+      <!-- Botón de navegación izquierda -->
+      <button id="nav-prev" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-2xl hover:text-gray-300 z-10 bg-black/50 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100">
+        ‹
+      </button>
+      
+      <!-- Botón de navegación derecha -->
+      <button id="nav-next" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-2xl hover:text-gray-300 z-10 bg-black/50 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100">
+        ›
+      </button>
+      
+      <!-- Botón para mostrar/ocultar información -->
+      <button id="toggle-info" class="absolute top-4 left-4 text-white text-lg hover:text-gray-300 z-10 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center backdrop-blur-sm transition-all duration-200">
+        ℹ
+      </button>
+      
+      <!-- Contenedor de imagen con información en el pie -->
+      <div class="relative w-full h-full flex flex-col items-center justify-center">
+        <!-- Imagen principal -->
+        <img id="large-image" class="w-full h-auto max-h-[80vh] object-contain rounded-lg shadow-2xl transition-all duration-300 transform scale-95 opacity-0" />
+        
+        <!-- Información en el pie de la imagen -->
+        <div id="large-image-info" class="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm rounded-t-lg p-4 text-white transform translate-y-full transition-transform duration-300">
+          <div class="flex justify-between items-start mb-2">
+            <h3 id="large-image-title" class="text-lg font-semibold"></h3>
+            <button id="close-info" class="text-gray-400 hover:text-white text-xl">
+              ×
+            </button>
+          </div>
+          <p id="large-image-description" class="text-sm text-gray-300 mb-3"></p>
+          <div class="flex items-center justify-between text-xs text-gray-400">
+            <span id="large-image-price"></span>
+            <span id="large-image-location"></span>
+            <span id="large-image-date"></span>
+          </div>
         </div>
       </div>
-      
-      <!-- Imagen principal -->
-      <img id="large-image" class="w-full h-auto max-h-[90vh] object-contain rounded-lg shadow-2xl" />
     </div>
   </div>
 
@@ -248,21 +269,25 @@ try {
     }
     
     #large-image-info {
-      transition: opacity 0.3s ease-in-out;
+      transition: transform 0.3s ease-in-out;
     }
     
-    #close-large-modal {
+    #large-image-info.show {
+      transform: translateY(0);
+    }
+    
+    #close-large-modal, #toggle-info {
       transition: all 0.2s ease-in-out;
     }
     
-    #close-large-modal:hover {
+    #close-large-modal:hover, #toggle-info:hover {
       transform: scale(1.1);
       background-color: rgba(0, 0, 0, 0.7);
     }
     
     /* Mejoras para la imagen en pantalla completa */
     #large-image {
-      transition: transform 0.3s ease-in-out;
+      transition: all 0.3s ease-in-out;
     }
     
     #large-image:hover {
@@ -277,6 +302,65 @@ try {
       right: 0;
       bottom: 0;
       z-index: 9999;
+    }
+    
+    /* Estilos para navegación */
+    #nav-prev, #nav-next {
+      transition: all 0.2s ease-in-out;
+    }
+    
+    #nav-prev:hover, #nav-next:hover {
+      transform: scale(1.1);
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    /* Mostrar botones de navegación al hacer hover en el modal */
+    #large-image-modal:hover #nav-prev,
+    #large-image-modal:hover #nav-next {
+      opacity: 1;
+    }
+    
+    /* Transición de entrada para la imagen */
+    #large-image.loaded {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    /* Transición de salida para el modal */
+    #large-image-modal.closing {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    
+    /* Animación de entrada para el modal */
+    #large-image-modal.entering {
+      animation: modalEnter 0.3s ease-out;
+    }
+    
+    @keyframes modalEnter {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    /* Estilos para el botón de información */
+    #toggle-info {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    /* Estilos para el botón de cerrar información */
+    #close-info {
+      transition: all 0.2s ease-in-out;
+    }
+    
+    #close-info:hover {
+      transform: scale(1.1);
     }
   </style>
 
